@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    width: 100%;
+  }
+  body {
+    overflow: hidden;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  ::selection {
+    background: theme("colors.rune.DEFAULT");
+    color: theme("colors.ink.900");
+  }
+}
+
+@layer components {
+  .panel-frame {
+    @apply relative rounded-2xl border border-rune/40 bg-ink-800/85 backdrop-blur-md shadow-panel;
+  }
+  .panel-frame::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border: 1px dashed rgba(94, 232, 184, 0.22);
+    border-radius: 14px;
+    pointer-events: none;
+  }
+
+  .rune-button {
+    @apply relative inline-flex items-center justify-center gap-2 rounded-xl border border-rune/40
+           bg-ink-800/70 px-4 py-2 font-display text-lg uppercase tracking-wider text-parchment
+           transition-all duration-200 hover:text-rune hover:border-rune
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rune/70;
+  }
+  .rune-button::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border: 1px solid rgba(94, 232, 184, 0.14);
+    border-radius: 10px;
+    pointer-events: none;
+    transition: inherit;
+  }
+  .rune-button:hover::after {
+    border-color: rgba(94, 232, 184, 0.42);
+  }
+
+  .pixelated {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  .vignette {
+    box-shadow: 0 0 220px 90px rgba(0, 0, 0, 0.65) inset,
+      0 0 60px 20px rgba(8, 10, 26, 0.6) inset;
+  }
+}
+
+@layer utilities {
+  .text-shadow-rune {
+    text-shadow: 0 0 14px rgba(94, 232, 184, 0.55), 0 1px 0 rgba(0, 0, 0, 0.6);
+  }
+  .text-shadow-ember {
+    text-shadow: 0 0 14px rgba(245, 158, 11, 0.48), 0 1px 0 rgba(0, 0, 0, 0.6);
+  }
+
+  /** Scroll still works (wheel / touch / keyboard); scrollbar chrome hidden. */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
