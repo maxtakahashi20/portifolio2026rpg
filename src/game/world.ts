@@ -27,6 +27,7 @@ export const CAMERA = {
 const SECTION_BIAS: { id: PortfolioSectionId; offset: Vec2 }[] = [
   { id: "origem", offset: { x: -520, y: -360 } },
   { id: "feitos", offset: { x: 540, y: -300 } },
+  { id: "projetos", offset: { x: -720, y: -120 } },
   { id: "grimorio", offset: { x: -640, y: 320 } },
   { id: "cronica", offset: { x: 600, y: 360 } },
   { id: "pacto", offset: { x: 0, y: 620 } },

@@ -33,6 +33,7 @@ export type InventoryItem = {
 export type PortfolioSectionId =
   | "origem"
   | "feitos"
+  | "projetos"
   | "grimorio"
   | "cronica"
   | "pacto";
@@ -45,8 +46,25 @@ export type PortfolioSection = {
   body: PortfolioBlock[];
 };
 
+export type PortfolioProject = {
+  name: string;
+  description: string;
+  stacks: string[];
+  /** Site ou demo em produção */
+  siteUrl?: string;
+  repoUrl?: string;
+};
+
+/** Projeto persistido pela API (`GET /api/projects`). */
+export type PortfolioProjectRecord = PortfolioProject & {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type PortfolioBlock =
   | { type: "paragraph"; text: string }
   | { type: "quote"; text: string; author?: string }
   | { type: "list"; label: string; items: string[] }
-  | { type: "links"; items: { label: string; url: string; glyph?: string }[] };
+  | { type: "links"; items: { label: string; url: string; glyph?: string }[] }
+  | { type: "projects"; items: PortfolioProject[] };

@@ -1,0 +1,11 @@
+node_modules
+dist
+dist-ssr
+.git
+.vite
+*.local
+.env
+.env.*
+!.env.example
+*.log
+bin

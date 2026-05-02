@@ -1,0 +1,13 @@
+# Blueprint Render: https://docs.render.com/docs/infrastructure-as-code
+# Dashboard → New → Blueprint → conecte o repo com este arquivo na raiz.
+services:
+  - type: web
+    name: portfolio-api
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/projects
+    envVars:
+      - key: ADMIN_SECRET
+        sync: false

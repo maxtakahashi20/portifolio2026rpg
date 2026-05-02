@@ -1,5 +1,12 @@
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { PortfolioSection } from "../game/types";
+import { apiUrl } from "../api/client";
+import { StackChips } from "./StackChips";
+import type {
+  PortfolioProject,
+  PortfolioProjectRecord,
+  PortfolioSection,
+} from "../game/types";
 
 type Props = {
   section: PortfolioSection | null;
@@ -11,6 +18,44 @@ type Props = {
  * `#card` element + innerHTML approach with a typed React renderer.
  */
 export function PortfolioPanel({ section, onClose }: Props) {
+  /** `undefined` = ainda não carregou · `null` = erro ao buscar */
+  const [remoteProjects, setRemoteProjects] = useState<
+    PortfolioProjectRecord[] | undefined | null
+  >(undefined);
+  const [projError, setProjError] = useState(false);
+
+  useEffect(() => {
+    if (!section || section.id !== "projetos") {
+      setRemoteProjects(undefined);
+      setProjError(false);
+      return;
+    }
+
+    let cancelled = false;
+    setRemoteProjects(undefined);
+    setProjError(false);
+
+    fetch(apiUrl("/api/projects"))
+      .then(async (r) => {
+        if (!r.ok) throw new Error("bad response");
+        return r.json() as Promise<PortfolioProjectRecord[]>;
+      })
+      .then((data) => {
+        if (cancelled) return;
+        setRemoteProjects(Array.isArray(data) ? data : []);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setProjError(true);
+          setRemoteProjects(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [section?.id]);
+
   return (
     <AnimatePresence>
       {section && (
@@ -32,7 +77,7 @@ export function PortfolioPanel({ section, onClose }: Props) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.97 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="panel-frame relative mx-4 flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden"
+            className="panel-frame relative mx-4 flex max-h-[85vh] w-full max-w-4xl flex-col overflow-hidden"
           >
             <Header section={section} onClose={onClose} />
 
@@ -41,6 +86,38 @@ export function PortfolioPanel({ section, onClose }: Props) {
                 {section.body.map((block, i) => (
                   <Block key={i} block={block} />
                 ))}
+
+                {section.id === "projetos" && (
+                  <div className="space-y-4">
+                    {!projError && remoteProjects === undefined && (
+                      <p className="font-body text-sm text-parchment-dark">
+                        Carregando projetos…
+                      </p>
+                    )}
+                    {projError && (
+                      <p className="font-body text-sm text-ember">
+                        Não foi possível carregar os projetos. Verifique se o
+                        servidor da API está rodando.
+                      </p>
+                    )}
+                    {!projError &&
+                      Array.isArray(remoteProjects) &&
+                      remoteProjects.length === 0 && (
+                        <p className="font-body text-sm text-parchment-dark">
+                          Nenhum projeto publicado ainda.
+                        </p>
+                      )}
+                    {!projError &&
+                      Array.isArray(remoteProjects) &&
+                      remoteProjects.length > 0 && (
+                        <div className="space-y-5 pt-1">
+                          {remoteProjects.map((p) => (
+                            <ProjectCard key={p.id} project={p} />
+                          ))}
+                        </div>
+                      )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -147,7 +224,65 @@ function Block({ block }: { block: PortfolioSection["body"][number] }) {
           ))}
         </ul>
       );
+    case "projects":
+      return (
+        <div className="space-y-5">
+          {block.items.map((p, i) => (
+            <ProjectCard key={`${p.name}-${i}`} project={p} />
+          ))}
+        </div>
+      );
   }
+}
+
+function ProjectCard({ project }: { project: PortfolioProject }) {
+  const { name, description, stacks, siteUrl, repoUrl } = project;
+  const hasLinks = Boolean(siteUrl?.trim()) || Boolean(repoUrl?.trim());
+
+  return (
+    <article className="rounded-xl border border-rune/25 bg-ink-900/35 px-5 py-4 shadow-inner shadow-black/20">
+      <h3 className="font-rune text-xl text-parchment text-shadow-rune md:text-2xl">
+        {name}
+      </h3>
+      <p className="mt-2 text-base leading-relaxed text-parchment/85">
+        {description}
+      </p>
+
+      <div className="mt-4">
+        <p className="mb-2 font-display text-[10px] uppercase tracking-[0.35em] text-rune text-shadow-rune">
+          Stack
+        </p>
+        <StackChips stacks={stacks} size="md" />
+      </div>
+
+      {hasLinks && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {siteUrl?.trim() && (
+            <a
+              href={siteUrl.trim()}
+              target="_blank"
+              rel="noreferrer"
+              className="rune-button inline-flex items-center gap-2 px-4 py-2 font-display text-xs uppercase tracking-[0.2em]"
+            >
+              <span aria-hidden>◇</span>
+              Ver site
+            </a>
+          )}
+          {repoUrl?.trim() && (
+            <a
+              href={repoUrl.trim()}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg border border-rune/35 bg-ink-900/60 px-4 py-2 font-display text-xs uppercase tracking-[0.2em] text-parchment transition-colors hover:border-rune hover:text-rune"
+            >
+              <span aria-hidden>⌥</span>
+              Repositório
+            </a>
+          )}
+        </div>
+      )}
+    </article>
+  );
 }
 
 function FooterRunes() {

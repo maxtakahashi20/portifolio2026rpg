@@ -91,6 +91,19 @@ export const PORTFOLIO_SECTIONS: PortfolioSection[] = [
     ],
   },
   {
+    id: "projetos",
+    title: "Projetos",
+    subtitle: "Runas gravadas em repositório",
+    rune: "⎔",
+    body: [
+      {
+        type: "paragraph",
+        text:
+          "Seleção de trabalhos com nome, descrição, tecnologias usadas e links para site ou repositório quando existirem.",
+      },
+    ],
+  },
+  {
     id: "grimorio",
     title: "Grimório",
     subtitle: "O que o viajante já aprendeu",
