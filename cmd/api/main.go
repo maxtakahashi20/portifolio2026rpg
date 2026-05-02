@@ -68,7 +68,8 @@ func main() {
 	mux.HandleFunc("/api/projects/", st.handleProjectItem)
 
 	addr := ":" + port
-	fmt.Printf("API Go em http://localhost%s\n", addr)
+	// ":" + port escuta em todas as interfaces (0.0.0.0 / IPv6 any); necessário no Render, Fly, etc.
+	fmt.Printf("API Go à escuta na porta %s (paths /api/projects)\n", port)
 	if err := http.ListenAndServe(addr, withCORS(mux)); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
