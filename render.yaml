@@ -1,12 +1,16 @@
 # Blueprint Render: https://docs.render.com/docs/infrastructure-as-code
-# Dashboard → New → Blueprint → conecte o repo com este arquivo na raiz.
+#
+# Serviço atual em Docker com erro "Dockerfile: no such file"?
+# → Em Settings do Web Service deixe "Root Directory" VAZIO (raiz do repo),
+#   ou troque para este runtime Go nativo criando um novo Web Service (runtime não muda depois).
 services:
   - type: web
     name: portfolio-api
-    runtime: docker
+    runtime: go
     plan: free
     region: oregon
-    dockerfilePath: ./Dockerfile
+    buildCommand: go build -o bin/api ./cmd/api
+    startCommand: ./bin/api
     healthCheckPath: /api/projects
     envVars:
       - key: ADMIN_SECRET
