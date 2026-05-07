@@ -14,6 +14,9 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/nedpals/supabase-go"
+	"github.com/joho/godotenv"
 )
 
 const maxBody = 512 * 1024
@@ -40,11 +43,28 @@ type createBody struct {
 type store struct {
 	mu       sync.Mutex
 	dataPath string
+	supabase *supabase.Client // Adiciona o client do Supabase
 }
 
 func main() {
-	for _, p := range []string{".env", filepath.Join("src", ".env")} {
-		loadDotEnv(p)
+	// Carrega as variáveis de ambiente antes de tudo
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Erro ao carregar .env: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Inicializa o cliente Supabase
+	supabaseURL := os.Getenv("SUPABASE_URL")
+	supabaseKey := os.Getenv("SUPABASE_KEY")
+	if supabaseURL == "" || supabaseKey == "" {
+		fmt.Fprintln(os.Stderr, "SUPABASE_URL e SUPABASE_KEY não configuradas no .env")
+		os.Exit(1)
+	}
+	client, err := supabase.NewClient(supabaseURL, supabaseKey)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Erro ao inicializar Supabase: %v\n", err)
+		os.Exit(1)
 	}
 
 	port := strings.TrimSpace(os.Getenv("PORT"))
@@ -57,7 +77,11 @@ func main() {
 		dataPath = filepath.Join("server", "data", "projects.json")
 	}
 
-	st := &store{dataPath: dataPath}
+	st := &store{
+		dataPath: dataPath,
+		supabase: client, // Passa o client do Supabase
+	}
+
 	if err := st.ensureFile(); err != nil {
 		fmt.Fprintf(os.Stderr, "dados: %v\n", err)
 		os.Exit(1)
@@ -68,7 +92,7 @@ func main() {
 	mux.HandleFunc("/api/projects/", st.handleProjectItem)
 
 	addr := ":" + port
-	// ":" + port escuta em todas as interfaces (0.0.0.0 / IPv6 any); necessário no Render, Fly, etc.
+	// Escuta em todas as interfaces (0.0.0.0 / IPv6 any)
 	fmt.Printf("API Go à escuta na porta %s (paths /api/projects)\n", port)
 	if err := http.ListenAndServe(addr, withCORS(mux)); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
@@ -144,17 +168,20 @@ func (st *store) handleCreate(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "JSON inválido"})
 		return
 	}
+
 	name := strings.TrimSpace(in.Name)
 	desc := strings.TrimSpace(in.Description)
 	if name == "" || desc == "" {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "name e description são obrigatórios"})
 		return
 	}
+
 	stacks, ok := parseStacks(in.Stacks)
 	if !ok {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "stacks deve ser lista ou texto separado por vírgula"})
 		return
 	}
+
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	p := project{
 		ID:          newUUID(),
@@ -171,18 +198,13 @@ func (st *store) handleCreate(w http.ResponseWriter, r *http.Request) {
 		p.RepoURL = s
 	}
 
-	st.mu.Lock()
-	defer st.mu.Unlock()
-	list, err := st.loadUnlocked()
+	// Inserindo no Supabase
+	_, err = st.supabase.Table("projects").Insert(p).Execute()
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Falha ao ler projetos"})
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Falha ao criar projeto no Supabase"})
 		return
 	}
-	list = append(list, p)
-	if err := st.saveUnlocked(list); err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Falha ao criar projeto"})
-		return
-	}
+
 	writeJSON(w, http.StatusCreated, p)
 }
 
@@ -449,26 +471,4 @@ func newUUID() string {
 		binary.BigEndian.Uint16(buf[8:10]),
 		low,
 	)
-}
-
-func loadDotEnv(path string) {
-	b, err := os.ReadFile(path)
-	if err != nil {
-		return
-	}
-	for _, line := range strings.Split(string(b), "\n") {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		i := strings.IndexByte(line, '=')
-		if i <= 0 {
-			continue
-		}
-		k := strings.TrimSpace(line[:i])
-		v := strings.TrimSpace(line[i+1:])
-		if os.Getenv(k) == "" {
-			_ = os.Setenv(k, v)
-		}
-	}
 }
