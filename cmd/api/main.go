@@ -109,6 +109,7 @@ func withCORS(next http.Handler) http.Handler {
 
 func (st *store) handleProjectsCollection(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
+
 	case http.MethodGet:
 		st.handleList(w)
 
@@ -129,6 +130,7 @@ func (st *store) handleProjectItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch r.Method {
+
 	case http.MethodPut:
 		st.handleUpdate(w, r, id)
 
@@ -191,6 +193,7 @@ func (st *store) handleCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	stacks, ok := parseStacks(in.Stacks)
+
 	if !ok {
 		writeJSON(w, http.StatusBadRequest, map[string]string{
 			"error": "stacks inválido",
@@ -217,12 +220,10 @@ func (st *store) handleCreate(w http.ResponseWriter, r *http.Request) {
 		p.RepoURL = s
 	}
 
-	
-
-	_, _, err := st.supabase.
-    From("projects").
-    Insert(p, false, "", "", "").
-    Execute()
+	_, _, err = st.supabase.
+		From("projects").
+		Insert(p, false, "", "", "").
+		Execute()
 
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{
@@ -241,6 +242,7 @@ func (st *store) handleUpdate(w http.ResponseWriter, r *http.Request, id string)
 	}
 
 	body, err := readBody(r)
+
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{
 			"error": "JSON inválido",
@@ -269,6 +271,7 @@ func (st *store) handleUpdate(w http.ResponseWriter, r *http.Request, id string)
 
 	if v, ok := raw["stacks"]; ok {
 		stacks, ok := parseStacks(v)
+
 		if !ok {
 			writeJSON(w, http.StatusBadRequest, map[string]string{
 				"error": "stacks inválido",
@@ -289,11 +292,11 @@ func (st *store) handleUpdate(w http.ResponseWriter, r *http.Request, id string)
 
 	updateData["updated_at"] = time.Now().UTC().Format(time.RFC3339Nano)
 
-	_, _, err := st.supabase.
-    From("projects").
-    Update(updateData, "", "").
-    Eq("id", id).
-    Execute()
+	_, _, err = st.supabase.
+		From("projects").
+		Update(updateData, "", "").
+		Eq("id", id).
+		Execute()
 
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{
@@ -314,10 +317,10 @@ func (st *store) handleDelete(w http.ResponseWriter, r *http.Request, id string)
 	}
 
 	_, _, err := st.supabase.
-    From("projects").
-    Delete("", "").
-    Eq("id", id).
-    Execute()
+		From("projects").
+		Delete("", "").
+		Eq("id", id).
+		Execute()
 
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{
@@ -348,6 +351,7 @@ var errUnauthorized = errors.New("unauthorized")
 
 func writeAuthError(w http.ResponseWriter, err error) {
 	switch err {
+
 	case errNoAdminSecret:
 		writeJSON(w, http.StatusServiceUnavailable, map[string]string{
 			"error": "ADMIN_SECRET não configurado",
@@ -386,14 +390,18 @@ func (st *store) load() ([]project, error) {
 }
 
 func (st *store) loadUnlocked() ([]project, error) {
-	var projects []project
-
-	err := st.supabase.
+	data, _, err := st.supabase.
 		From("projects").
 		Select("*", "", false).
-		Execute(&projects)
+		Execute()
 
 	if err != nil {
+		return nil, err
+	}
+
+	var projects []project
+
+	if err := json.Unmarshal(data, &projects); err != nil {
 		return nil, err
 	}
 
