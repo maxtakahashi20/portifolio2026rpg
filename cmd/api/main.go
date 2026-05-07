@@ -217,12 +217,12 @@ func (st *store) handleCreate(w http.ResponseWriter, r *http.Request) {
 		p.RepoURL = s
 	}
 
-	var result []project
+	
 
-	err = st.supabase.
-		From("projects").
-		Insert(p, false, "", "", "").
-		Execute(&result)
+	_, _, err := st.supabase.
+    From("projects").
+    Insert(p, false, "", "", "").
+    Execute()
 
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{
@@ -289,13 +289,11 @@ func (st *store) handleUpdate(w http.ResponseWriter, r *http.Request, id string)
 
 	updateData["updated_at"] = time.Now().UTC().Format(time.RFC3339Nano)
 
-	var result []project
-
-	err = st.supabase.
-		From("projects").
-		Update(updateData, "", "").
-		Eq("id", id).
-		Execute(&result)
+	_, _, err := st.supabase.
+    From("projects").
+    Update(updateData, "", "").
+    Eq("id", id).
+    Execute()
 
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{
@@ -315,13 +313,11 @@ func (st *store) handleDelete(w http.ResponseWriter, r *http.Request, id string)
 		return
 	}
 
-	var result []project
-
-	err := st.supabase.
-		From("projects").
-		Delete("", "").
-		Eq("id", id).
-		Execute(&result)
+	_, _, err := st.supabase.
+    From("projects").
+    Delete("", "").
+    Eq("id", id).
+    Execute()
 
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{
