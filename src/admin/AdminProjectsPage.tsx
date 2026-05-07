@@ -120,9 +120,18 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         headers: secretHeader(),
         body: JSON.stringify(payload),
       });
-      const body = (await r.json().catch(() => ({}))) as { error?: string };
+      const raw = await r.text();
+      let body = {} as { error?: string };
+      try {
+        body = JSON.parse(raw) as { error?: string };
+      } catch {
+        /* resposta pode ser HTML ou texto quando rota falha no edge */
+      }
       if (!r.ok) {
-        setFormError(body.error ?? "Falha ao salvar.");
+        const detail =
+          body.error ??
+          (raw.trim().length ? raw.slice(0, 200) : "resposta vazia");
+        setFormError(`${method} ${r.status}: ${detail}`);
         return;
       }
       resetForm();
