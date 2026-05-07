@@ -420,19 +420,11 @@ func (st *store) loadUnlocked() ([]project, error) {
 }
 
 func parseStacks(v interface{}) ([]string, bool) {
-	// Payload pode omitir "stacks" ou enviar null; trata como lista vazia.
 	if v == nil {
-		return []string{}, true
+		return nil, false
 	}
 
 	switch t := v.(type) {
-
-	case []string:
-		out := append([]string(nil), t...)
-		if out == nil {
-			return []string{}, true
-		}
-		return out, true
 
 	case string:
 		parts := strings.FieldsFunc(t, func(r rune) bool {

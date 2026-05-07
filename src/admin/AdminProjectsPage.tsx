@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { apiUrl } from "../api/client";
 import { ADMIN_LOGIN_ROUTE } from "../config/admin";
@@ -92,7 +92,8 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     setFormError(null);
   };
 
-  const submit = async () => {
+  const submit = async (ev?: FormEvent) => {
+    ev?.preventDefault();
     setFormError(null);
     const stacks = stackTokens.filter(Boolean);
     const payload = {
@@ -114,30 +115,26 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         editingId === null
           ? apiUrl("/api/projects")
           : apiUrl(`/api/projects/${editingId}`);
-      const method = editingId === null ? "POST" : "PUT";
+      const method = editingId === null ? ("POST" as const) : ("PUT" as const);
       const r = await fetch(url, {
         method,
         headers: secretHeader(),
         body: JSON.stringify(payload),
       });
-      const raw = await r.text();
-      let body = {} as { error?: string };
-      try {
-        body = JSON.parse(raw) as { error?: string };
-      } catch {
-        /* resposta pode ser HTML ou texto quando rota falha no edge */
-      }
+      const body = (await r.json().catch(() => ({}))) as { error?: string };
       if (!r.ok) {
-        const detail =
-          body.error ??
-          (raw.trim().length ? raw.slice(0, 200) : "resposta vazia");
-        setFormError(`${method} ${r.status}: ${detail}`);
+        const msg = body.error?.trim() ?? "Falha ao salvar.";
+        setFormError(`${msg} (HTTP ${r.status} · ${method})`);
         return;
       }
       resetForm();
       await refresh();
     } catch {
-      setFormError("Erro de rede ao salvar.");
+      setFormError(
+        editingId === null
+          ? "Erro de rede ao criar (POST)."
+          : "Erro de rede ao atualizar (PUT).",
+      );
     } finally {
       setSaving(false);
     }
@@ -228,7 +225,8 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             <h2 className="font-display text-sm uppercase tracking-[0.35em] text-rune">
               {editingId ? "Editar" : "Adicionar"}
             </h2>
-            <label className="mt-5 block font-display text-[10px] uppercase tracking-[0.25em] text-parchment-dark">
+            <form className="mt-5" onSubmit={(e) => void submit(e)}>
+            <label className="block font-display text-[10px] uppercase tracking-[0.25em] text-parchment-dark">
               Nome
             </label>
             <input
@@ -301,13 +299,13 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             )}
 
             <button
-              type="button"
+              type="submit"
               disabled={saving}
-              onClick={submit}
               className="rune-button mt-6 w-full justify-center py-3 text-sm disabled:opacity-50"
             >
               {saving ? "Salvando…" : editingId ? "Atualizar (PUT)" : "Criar (POST)"}
             </button>
+            </form>
 
             <StackPickerModal
               open={pickerOpen}
@@ -320,7 +318,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 
           <section className="panel-frame min-w-0 px-6 py-6">
             <h2 className="font-display text-sm uppercase tracking-[0.35em] text-rune">
-              Cadastrados (GET)
+              Projetos publicados
             </h2>
             {loadingList && (
               <p className="mt-6 font-body text-sm text-parchment-dark">Carregando…</p>

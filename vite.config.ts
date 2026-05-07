@@ -8,7 +8,7 @@ export default defineConfig({
     open: true,
     proxy: {
       "/api": {
-        target: "https://portifolio2026rpg-1.onrender.com",
+        target: "https://portfolio2026rpg.onrender.com",
         changeOrigin: true,
       },
     },
