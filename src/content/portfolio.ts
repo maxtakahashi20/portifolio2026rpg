@@ -71,19 +71,19 @@ export const PORTFOLIO_SECTIONS: PortfolioSection[] = [
       {
         type: "paragraph",
         text:
-          "Já naveguei por front-end, back-end e, mais recentemente, cibersegurança — sempre tentando entender a engrenagem por trás da interface.",
+          "Navego todo  dia  entre o FrontEnd e BackEnd",
       },
       {
         type: "paragraph",
         text:
-          "Estagiei seis meses em uma loja de suplementos, onde participei da reconstrução do site e automatizei tabelas pesadas com JavaScript. Hoje cuido do back-end da SpacyLaxy de forma remota.",
+          "Atualmente trabalho na CorsiEnterprise,mais  sempre aberto pra  novos  projetos/freelancer",
       },
       {
         type: "links",
         items: [
           {
             label: "GitHub",
-            url: "https://github.com/CristianRsouza",
+            url: "https://github.com/maxtakahashi20",
             glyph: "⌥",
           },
         ],
