@@ -86,7 +86,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     setEditingId(p.id);
     setName(p.name);
     setDescription(p.description);
-    setStackTokens(p.stacks.map((s) => normalizeStackToken(s)));
+    setStackTokens((Array.isArray(p.stacks) ? p.stacks : []).map((s) => normalizeStackToken(s)));
     setSiteUrl(p.siteUrl ?? "");
     setRepoUrl(p.repoUrl ?? "");
     setFormError(null);

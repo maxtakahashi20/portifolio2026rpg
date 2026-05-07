@@ -152,6 +152,12 @@ func (st *store) handleList(w http.ResponseWriter) {
 		return
 	}
 
+	for i := range list {
+		if list[i].Stacks == nil {
+			list[i].Stacks = []string{}
+		}
+	}
+
 	sort.Slice(list, func(i, j int) bool {
 		return list[i].UpdatedAt > list[j].UpdatedAt
 	})
@@ -435,6 +441,9 @@ func parseStacks(v interface{}) ([]string, bool) {
 			}
 		}
 
+		if out == nil {
+			return []string{}, true
+		}
 		return out, true
 
 	case []interface{}:
@@ -448,6 +457,9 @@ func parseStacks(v interface{}) ([]string, bool) {
 			}
 		}
 
+		if out == nil {
+			return []string{}, true
+		}
 		return out, true
 
 	default:

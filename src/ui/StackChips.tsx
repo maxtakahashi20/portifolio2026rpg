@@ -1,12 +1,13 @@
 import { resolveStack } from "../data/techStacks";
 
 type Props = {
-  stacks: string[];
+  stacks?: string[] | null;
   /** `sm` para linhas compactas (lista admin). */
   size?: "sm" | "md";
 };
 
 export function StackChips({ stacks, size = "md" }: Props) {
+  const safeStacks = Array.isArray(stacks) ? stacks : [];
   const iconCls = size === "sm" ? "h-4 w-4" : "h-5 w-5";
   const textCls =
     size === "sm"
@@ -15,7 +16,7 @@ export function StackChips({ stacks, size = "md" }: Props) {
 
   return (
     <ul className="flex flex-wrap gap-2">
-      {stacks.map((raw, i) => {
+      {safeStacks.map((raw, i) => {
         const { label, Icon } = resolveStack(raw);
         return (
           <li
