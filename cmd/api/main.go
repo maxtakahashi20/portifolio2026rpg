@@ -207,7 +207,12 @@ func (st *store) handleCreate(w http.ResponseWriter, r *http.Request) {
 		ID:          newUUID(),
 		Name:        name,
 		Description: desc,
-		Stacks:      stacks,
+		Stacks: func() []string {
+    if stacks == nil {
+        return []string{}
+    }
+    return stacks
+}(),
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
