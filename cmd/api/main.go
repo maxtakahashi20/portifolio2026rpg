@@ -45,11 +45,7 @@ type store struct {
 }
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Erro ao carregar .env: %v\n", err)
-		os.Exit(1)
-	}
+	_ = godotenv.Load()
 
 	supabaseURL := strings.TrimSpace(os.Getenv("SUPABASE_URL"))
 	supabaseKey := strings.TrimSpace(os.Getenv("SUPABASE_KEY"))
