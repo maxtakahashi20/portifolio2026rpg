@@ -178,11 +178,11 @@ export const PORTFOLIO_SECTIONS: PortfolioSection[] = [
             url: "https://github.com/maxtakahashi20",
             glyph: "⌥",
           },
-          {
-            label: "LinkedIn",
-            url: "www.linkedin.com/in/ismaeldelimamarques",
-            glyph: "⌬",
-          },
+          // {
+          //   label: "LinkedIn",
+          //   url: "www.linkedin.com/in/ismaeldelimamarques",
+          //   glyph: "⌬",
+          // },
           {
             label: "Instagram",
             url: "https://www.instagram.com/max_takahashi21/",
