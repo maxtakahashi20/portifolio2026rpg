@@ -104,33 +104,76 @@ export const PORTFOLIO_SECTIONS: PortfolioSection[] = [
     ],
   },
   {
-    id: "grimorio",
-    title: "Grimório",
-    subtitle: "O que o viajante já aprendeu",
-    rune: "✷",
-    body: [
-      {
-        type: "list",
-        label: "Linguagens",
-        items: [ "TypeScript", "JavaScript", "Node.js", "Express.js", "Tailwind CSS" , "PostgreSQL" , "NoSql" , "Golang", "MySQL"],
-      },
-      {
-        type: "list",
-        label: "Frameworks & libs",
-        items: ["React", "Vue.js", "Next", "Framer Motion"],
-      },
-      {
-        type: "list",
-        label: "Ferramentas & ambiente",
-        items: ["Docker", "Git", "Linux", "Vite"],
-      },
-      {
-        type: "list",
-        label: "Idiomas",
-        items: ["Português (nativo)", "Inglês (intermediário/avançado)"],
-      },
-    ],
-  },
+  id: "grimorio",
+  title: "Grimório",
+  subtitle: "O que o viajante já aprendeu",
+  rune: "✷",
+  body: [
+    {
+      type: "list",
+      label: "Linguagens & Tecnologias",
+      items: [
+        "TypeScript",
+        "JavaScript",
+        "Node.js",
+        "Golang",
+        "HTML5",
+        "CSS3",
+        "Tailwind CSS",
+        "REST API",
+        "WebSocket",
+        "JWT",
+        "OAuth"
+      ],
+    },
+    {
+      type: "list",
+      label: "Frameworks & Bibliotecas",
+      items: [
+        "React.js",
+        "Next.js",
+        "NestJS",
+        "Express.js",
+        "Framer Motion"
+      ],
+    },
+    {
+      type: "list",
+      label: "Banco de Dados",
+      items: [
+        "PostgreSQL",
+        "MySQL",
+        "MongoDB",
+        "Supabase",
+        "Firebase"
+      ],
+    },
+    {
+      type: "list",
+      label: "Ferramentas & Ambiente",
+      items: [
+        "Docker",
+        "Git",
+        "GitHub",
+        "Postman",
+        "Linux",
+        "Vercel",
+        "Netlify",
+        "Render",
+        "VS Code",
+        "Figma"
+      ],
+    },
+    {
+      type: "list",
+      label: "Idiomas",
+      items: [
+        "Português (nativo)",
+        "Inglês (intermediário)"
+      ],
+    },
+  ],
+},
   {
     id: "cronica",
     title: "Crônica",
